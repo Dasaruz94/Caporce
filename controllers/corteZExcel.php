@@ -1,0 +1,184 @@
+<?php
+
+ob_start();
+
+
+date_default_timezone_set('UTC'); // PHP's date function uses this value!
+include '../libs/conexion.php';
+
+//if($_GET['tipo'] == 1){
+
+
+    $consulta = "SELECT * FROM ingresos WHERE fecha_ingreso LIKE '".date('Y-m-d')."'";
+    $consulta1 = "SELECT * FROM gastos WHERE fecha_pago LIKE '".date('Y-m-d')."'";
+    $consulta2 = "SELECT * FROM caja WHERE fecha LIKE '".date('Y-m-d')."'";
+
+
+
+/*}else{
+    $consulta = "SELECT id_ingresos,fecha_ingreso,descripcion,precio FROM ingresos  WHERE (fecha_ingreso BETWEEN '".$_GET['fI']."' AND '".$_GET['fF']."')";
+    $consulta1 = "SELECT id_gastos, fecha_pago,descripcion, precio FROM gastos  WHERE (fecha_pago BETWEEN '".$_GET['fI']."' AND '".$_GET['fF']."')";
+
+} */
+
+$resultado = $mysqli->query($consulta);
+$resultado1 = $mysqli->query($consulta1);
+$resultado2 = $mysqli->query($consulta2);
+
+//$total = mysqli_num_rows($resultado, $resultado1); //Contamos la cantidad de filas que nos arrojo el resultado
+
+$total = 1;
+if ($total > 0) {
+
+    require_once '../libs/PHPExcel.php';
+
+    $objPHPExcel = new PHPExcel();
+// Set properties
+    $objPHPExcel->getProperties()->setCreator("Caporce");
+    $objPHPExcel->getProperties()->setLastModifiedBy("Caporce");
+    $objPHPExcel->getProperties()->setTitle("Reporte Entradas/Salidas Caporce");
+    $objPHPExcel->getProperties()->setSubject("Reporte Entradas/Salidas");
+    $objPHPExcel->getProperties()->setDescription("Reporte Entradas/Salidas");
+
+
+
+    $arrayLabels = array();
+//Nos va servir para obtener los labels de cada campo
+
+    $counter = 3;
+
+    $rango = range("A","Z");
+
+    $tituloReporte = "Corte z de Caja CAPORCE";
+    $titulosColumnas = array('Folio Ingreso','Ingresos','Descripcion', 'Monto', 'Folio de Gasto', 'Gastos','Descripcion','Monto');
+    //ancho de celdas automatico
+    for($i = 'A'; $i <= 'H'; $i++){
+        $objPHPExcel->setActiveSheetIndex(0)->getColumnDimension($i)->setAutoSize(TRUE);
+    }
+
+
+    /*
+$result = mysql_query("SELECT SUM(puntos) as total FROM encuesta WHERE idusuario=1");
+$row = mysql_fetch_array($result, MYSQL_ASSOC);
+echo $row["total"];
+
+    */
+    ob_clean();
+
+    while ($fila2 = mysqli_fetch_array($resultado2)) {
+
+
+
+        $caja = $fila2['cantidad'];
+
+    }
+    /*Aqui se deben de elegir que campos se pueden mostrar para el usuario*/
+    $objPHPExcel->getActiveSheet()->SetCellValue("A1", $tituloReporte);
+    $objPHPExcel->getActiveSheet()->SetCellValue("C1", 'En caja: '.$caja.'');
+    $objPHPExcel->getActiveSheet()->SetCellValue("A2", $titulosColumnas[0]);
+    $objPHPExcel->getActiveSheet()->SetCellValue("B2", $titulosColumnas[1]);
+    $objPHPExcel->getActiveSheet()->SetCellValue("C2", $titulosColumnas[2]);
+    $objPHPExcel->getActiveSheet()->SetCellValue("D2", $titulosColumnas[3]);
+    $objPHPExcel->getActiveSheet()->SetCellValue("F2", $titulosColumnas[4]);
+    $objPHPExcel->getActiveSheet()->SetCellValue("G2", $titulosColumnas[5]);
+    $objPHPExcel->getActiveSheet()->SetCellValue("H2", $titulosColumnas[6]);
+    $objPHPExcel->getActiveSheet()->SetCellValue("I2", $titulosColumnas[7]);
+
+
+ $totalPrecio1 = 0;
+    while ($fila = mysqli_fetch_array($resultado)) {
+
+
+        $objPHPExcel->getActiveSheet()->SetCellValue("B" . $counter, $fila['fecha_ingreso']);
+        $objPHPExcel->getActiveSheet()->SetCellValue("C" . $counter, $fila['descripcion']);
+
+        $objPHPExcel->getActiveSheet()->SetCellValue("D" . $counter, $fila['precio']);
+
+        $totalPrecio1 = $fila['precio'] + $totalPrecio1;
+        $counter++;
+        $i++;
+    }
+
+    $objPHPExcel->getActiveSheet()->SetCellValue("D" . $counter, $totalPrecio1);
+
+
+    $Precio = 0;
+    $counter = 3;
+    while ($fila1 = mysqli_fetch_array($resultado1)) {
+
+        $objPHPExcel->getActiveSheet()->SetCellValue("G" . $counter, $fila1['fecha_pago']);
+        $objPHPExcel->getActiveSheet()->SetCellValue("H" . $counter, $fila1['descripcion']);
+
+        $objPHPExcel->getActiveSheet()->SetCellValue("I" . $counter, $fila1['precio']);
+
+        $Precio = $fila1['precio'] + $Precio;
+
+        $counter++;
+        $i++;
+    }
+
+
+    $objPHPExcel->getActiveSheet()->SetCellValue("I" . $counter, $Precio);
+    // ob_start();
+
+
+
+//otros dispositivos
+
+
+
+    $estiloTituloReporte = array(
+        'font' => array(
+            'name'      => 'Arial',
+            'bold'      => true,
+            'italic'    => false,
+            'strike'    => false,
+            'size' =>13,
+            'color'     => array(
+                'rgb' => 'FFFFFF'
+            )
+        ),
+        'fill' => array(
+            'type'	=> PHPExcel_Style_Fill::FILL_SOLID,
+            'color'	=> array(
+                'argb' => 'FF220835')
+        ),
+        'borders' => array(
+            'allborders' => array(
+                'style' => PHPExcel_Style_Border::BORDER_NONE
+            )
+        ),
+        'alignment' => array(
+            'horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_CENTER,
+            'vertical' => PHPExcel_Style_Alignment::VERTICAL_CENTER,
+            'rotation' => 0,
+            'wrap' => TRUE
+        )
+    );
+
+
+
+
+//forma sencilla de dar estilos
+    $objPHPExcel->getActiveSheet()->getStyle('A1:B1')->applyFromArray($estiloTituloReporte);
+    // $objPHPExcel->getActiveSheet()->getStyle('A3:M3')->applyFromArray($estiloTituloColumnas);
+    //$objPHPExcel->getActiveSheet()->setSharedStyle($estiloInformacion, "A3:M".($counter-1));
+
+    $nombreArchivo = "ReporteCorteZ". date('d-m-Y');
+
+    header("Pragma: public");
+    header("Expires: 0");
+    header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
+    header("Content-Type: application/force-download");
+    header("Content-Type: application/octet-stream");
+    header("Content-Type: application/download");;
+    header("Content-Disposition: attachment;filename=$nombreArchivo.xls");
+    header("Content-Transfer-Encoding: binary ");
+
+    $objWriter = new PHPExcel_Writer_Excel5($objPHPExcel);
+    $objWriter->save('php://output');
+
+
+}
+
+?>

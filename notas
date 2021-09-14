@@ -1,0 +1,8 @@
+nota:
+
+Poner la fecha en de mexico en las librerias, ya que no esta bien puesta. X
+
+$datetime1 = new DateTime($row[3]);
+                            $datetime2 = new DateTime($row[4]);
+                            $interval = date_diff($datetime1, $datetime2);
+                            echo $interval->format('%R%a días');
