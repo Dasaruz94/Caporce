@@ -24,7 +24,7 @@ if(isset($_SESSION['nombre'])) {
 
         include 'menu.php';
 
-        $consulta = "SELECT * FROM ventas WHERE id_clientes LIKE '".$_GET['id']."' ORDER BY id_ventas DESC";
+        $consulta = "SELECT * FROM ventas WHERE activo LIKE 1 AND id_clientes LIKE '".$_GET['id']."' ORDER BY id_ventas DESC";
 
         //$consulta = "SELECT * FROM ".$tablaDeMysql." WHERE id_clientes IN (SELECT nombre_cliente FROM clientes WHERE id_clientes == id_clientes) AND (SELECT nombre_producto FROM productos_gral WHERE id_productos_gral == id_productos_gral)";
         $resultado1 = $mysqli->query($consulta);
